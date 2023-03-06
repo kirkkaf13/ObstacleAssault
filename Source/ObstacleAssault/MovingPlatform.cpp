@@ -6,7 +6,7 @@
 // Sets default values
 AMovingPlatform::AMovingPlatform()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -17,30 +17,48 @@ void AMovingPlatform::BeginPlay()
 	Super::BeginPlay();
 
 	StartingLocation = GetActorLocation();
-	
 }
 
 // Called every frame
 void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	MovePlatform(DeltaTime);
+	RotatePlatform(DeltaTime);
+}
+
+void AMovingPlatform::MovePlatform(float DeltaTime)
+{
 
 
-	FVector CurrentLocation = GetActorLocation();
-
-	CurrentLocation += PlatformVelocity * DeltaTime;
-
-	SetActorLocation(CurrentLocation);
-
-	double DistanceTravelled = FVector::Dist(StartingLocation, CurrentLocation);
-
-	if (DistanceTravelled > MoveDistance) {
+	if (ShouldPlatformTurn()) {
 		FVector PlatformDirection = PlatformVelocity.GetSafeNormal();
 		StartingLocation = StartingLocation + PlatformDirection * MoveDistance;
 		SetActorLocation(StartingLocation);
 		PlatformVelocity = -PlatformVelocity;
 	}
+	else
+	{
+		FVector CurrentLocation = GetActorLocation();
+		CurrentLocation += PlatformVelocity * DeltaTime;
+		SetActorLocation(CurrentLocation);
+	}
 
 
 }
- 
+
+void AMovingPlatform::RotatePlatform(float)
+{
+	UE_LOG(LogTemp, Display, TEXT("Rotating"));
+}
+
+bool AMovingPlatform::ShouldPlatformTurn() const
+{
+	return GetDistanceTravelled() > MoveDistance;
+}
+
+double AMovingPlatform::GetDistanceTravelled() const
+{
+	return FVector::Dist(StartingLocation, GetActorLocation());
+}
+
